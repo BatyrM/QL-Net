@@ -46,6 +46,17 @@ def splitData(stack, data, labels, depth, parent, i):
 
     return stack, density
 
+def closest_to_centroids(data, y, centroids, n_cl, num_dim):
+    #print(centroids.shape, y.shape)
+    min_dist = [555555555] * n_cl
+    new_centroids = np.zeros((n_cl, num_dim))
+    for idx, x in enumerate(data):
+        cur_centroid = centroids[y[idx]]
+        dist = euclidean(x, cur_centroid)
+        if min_dist[y[idx]] > dist:
+            min_dist[y[idx]] = dist
+            new_centroids[y[idx]] = x
+    return new_centroids
 
 def construct(data, n_cl, density, max_depth):
     tree = []
@@ -59,9 +70,11 @@ def construct(data, n_cl, density, max_depth):
     kmeans.fit(data)
     y = kmeans.labels_
     centroids = kmeans.cluster_centers_
+    new_centroids = closest_to_centroids(data, y, centroids, n_cl, data.shape[1])
+
 
     # 2. Add root nodes to the tree
-    tree,stack,node_id = addNode(centroids, tree, parent, depth, node_id, stack, data, y)
+    tree,stack,node_id = addNode(new_centroids, tree, parent, depth, node_id, stack, data, y)
     # 3.
     while stack:
         data_subset = stack.pop()
@@ -74,8 +87,9 @@ def construct(data, n_cl, density, max_depth):
             kmeans.fit(data_subset.data)
             y = kmeans.labels_
             centroids = kmeans.cluster_centers_
+            new_centroids = closest_to_centroids(data, y, centroids, n_cl, data_subset.data.shape[1])
             temp = node_id # id of a first child
-            tree,stack,node_id = addNode(centroids, tree, parent, depth, node_id, stack, data_subset.data, y)
+            tree,stack,node_id = addNode(new_centroids, tree, parent, depth, node_id, stack, data_subset.data, y)
             tree[parent].child = temp
 
         else:
@@ -86,7 +100,8 @@ def construct(data, n_cl, density, max_depth):
 def euclidian(a,b):
     return torch.sqrt(((a-b)**2).sum(-1))
 #    return (torch.abs(a-b)).sum(-1)
-
+def euclidean(a, b):
+    return np.sqrt(((a-b)**2).sum(-1))
 def convolution(a,b):
     return torch.nn.functional.conv2d(a,b)
 
@@ -94,9 +109,9 @@ def cosine(a,b):
     cos = torch.nn.CosineSimilarity(dim=-1, eps=1e-6)
     return cos(a,b)
 
-def measure_distance(current_node, data, tree,smallest_distance):
+def measure_distance(current_node, data, tree, smallest_distance):
     nodes = tree
-    dist = euclidian(data,nodes)
+    dist = euclidian(data, nodes)
 #    val, best_node = torch.max(dist,-1) for cosine
     val, best_node = torch.min(dist,-1)
     best_node = best_node.type(torch.IntTensor).cpu().numpy()
