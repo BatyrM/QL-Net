@@ -44,6 +44,9 @@ lookup_table2 = torch.FloatTensor(nodes2).to(device).unsqueeze(0)
 print(lookup_table1.size())
 print(lookup_table2.size())
 args.out_name = 'mnist_ql_layer'+str(layer_id1)+'&layer'+str(layer_id2)+'.pth'
-train(model,train_loader, test_loader, args, device, layer_id=layer_id2, tree=[[lookup_table1], [lookup_table2]])
+print("\n\nWith only first layer quantized:\n")
+train(model, train_loader, test_loader, args, device, layer_id=layer_id1, tree=[lookup_table1])
+print("\n\nWith both layers quantized:\n")
+train(model, train_loader, test_loader, args, device, layer_id=layer_id2, tree=[[lookup_table1], [lookup_table2]])
 
 # test(model, test_loader, device)
