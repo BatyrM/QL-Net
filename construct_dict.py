@@ -47,11 +47,12 @@ train_loader = get_data(args, dataset='mnist', ifTrain=True)
 for batch_idx, (data, target) in enumerate(train_loader):
     data, target = data.to(device), target.to(device)
     _, activations = model(data)
+    #print(len(activations))
     activation0 = activations[0].cpu().data.numpy()
     activation1 = activations[1].cpu().data.numpy()
     activation2 = activations[2].cpu().data.numpy()
     
-    torch.save(activation0, os.path.join(activation_folder1, layer0 + '_'+str(batch_idx)+'.npy'))
+    torch.save(activation0, os.path.join(activation_folder0, layer0 + '_'+str(batch_idx)+'.npy'))
     torch.save(activation1, os.path.join(activation_folder1, layer1 + '_'+str(batch_idx)+'.npy'))
     torch.save(activation2, os.path.join(activation_folder2, layer2 + '_'+str(batch_idx)+'.npy'))
     if batch_idx>6:break

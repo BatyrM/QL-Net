@@ -22,10 +22,10 @@ class Quantizer(Function):
         input_size = input.size()
         if ifTraining:
             # print "Quantizing during training "
-            output = quantize(input, tree, isInput)
+            output = quantize(input, tree)
         else:
             # If testing then just precomputed value = conv(center, weights)
-            output = self.lookup(input, weights, tree, lookup_table)
+            output = self.lookup(input, weights, tree, lookup_table, isInput)
         self.save_for_backward(input)
         return output
 
@@ -34,7 +34,7 @@ class Quantizer(Function):
     def backward(self, grad_output):
         # quantization module is non-diferantiable, hence, zeroing all gradiens in order not to change the previous layers
         grad_input = grad_output.new_zeros(grad_output.shape)
-        return grad_input, None, None, None # as there were 4 inputs, need to provide gradients for all
+        return grad_input, None, None, None, None # as there were 4 inputs, need to provide gradients for all --> became 5 inputs when adding quantization for input layer
 
 def quantize_patch(x, y, input, k, kernel):
         stride = 1
@@ -46,10 +46,15 @@ def quantize_patch(x, y, input, k, kernel):
         patch = patch.reshape(1, np.size(patch))
         return patch
 
-def lookup(input, weights, tree, lookup_table):
+def lookup(input, weights, tree, lookup_table, isInput):
         pad = 1
         kernel = 5
         stride = 1
+
+        
+        
+        if isInput:
+           kernel = 4
 
         batch_size = input.size(0)
         N = (input.size(3) + 2*pad - kernel)/stride + 1
@@ -62,16 +67,14 @@ def lookup(input, weights, tree, lookup_table):
                     y_step = y*stride
                     patch = input[k, :, x_step:x_step+kernel, y_step:y_step+kernel]
                     patch = patch.contiguous().view(1, patch.nelement())
-                    center, center_id = ht.predict(tree, patch.data.cpu().numpy()) #  quantize currect patch
+                    center, center_id = ht.predict(tree, patch.data.cpu().numpy()) #  quantize current patch
                     output[k, :, x_step, y_step] = lookup_table[center_id] # copy approximation to upsampled image
         return output
 
-def quantize(input, tree, isInput):
+def quantize(input, tree):
         p = 0 # padding, as we want to approximate exact input, we dont add any padding
         kernel = 1
         stride = 1
-        if isInput:
-            kernel = 4
         batch_size = input.size(0)
         depth = input.size(1)
         m = input.size(3) # width and height of the filter
