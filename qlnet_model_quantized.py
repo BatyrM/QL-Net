@@ -20,7 +20,7 @@ class BS_Net(nn.Module):
             x = self.quantize_activation(x, True, tree0[n-1], 'lookup_table', True)
         elif n==2:
             tree0, _, _ = tree
-            x = self.quantize_activation(x, True, tree0[n-1], 'lookup_table', True)
+            x = self.quantize_activation(x, True, tree0[n-2], 'lookup_table', True)
         
         layer1 = self.activation(F.max_pool2d(self.bn1(self.conv1(x)), 2))
         
