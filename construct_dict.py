@@ -26,6 +26,11 @@ model = BS_Net()
 model.load_state_dict(torch.load('mnist_baseline.pth'))
 model.to(device).eval()
 
+layer_id = 0
+layer0 = 'layer' + str(layer_id)
+activation_folder0 = os.path.join('./activations', layer0)
+if_exist(activation_folder0)
+
 layer_id = 1
 layer1 = 'layer' + str(layer_id)
 activation_folder1 = os.path.join('./activations', layer1)
@@ -42,8 +47,11 @@ train_loader = get_data(args, dataset='mnist', ifTrain=True)
 for batch_idx, (data, target) in enumerate(train_loader):
     data, target = data.to(device), target.to(device)
     _, activations = model(data)
-    activation1 = activations[0].cpu().data.numpy()
-    activation2 = activations[1].cpu().data.numpy()
+    activation0 = activations[0].cpu().data.numpy()
+    activation1 = activations[1].cpu().data.numpy()
+    activation2 = activations[2].cpu().data.numpy()
+    
+    torch.save(activation0, os.path.join(activation_folder1, layer0 + '_'+str(batch_idx)+'.npy'))
     torch.save(activation1, os.path.join(activation_folder1, layer1 + '_'+str(batch_idx)+'.npy'))
     torch.save(activation2, os.path.join(activation_folder2, layer2 + '_'+str(batch_idx)+'.npy'))
     if batch_idx>6:break
@@ -56,8 +64,12 @@ max_depth = 1
 
 # Load activations
 print('Load activations')
+data0 = la.load_data(activation_folder0) # load patched data0
 data1 = la.load_data(activation_folder1) # load patched data1
 data2 = la.load_data(activation_folder2) # load patched data2
+print('Construct tree 0')
+tree0 = ht.construct(data0, n_cl, 1, max_depth)
+torch.save(tree0, 'tree_' + layer0)
 print('Construct tree 1')
 tree1 = ht.construct(data1, n_cl, density, max_depth)
 torch.save(tree1, 'tree_' + layer1)

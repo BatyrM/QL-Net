@@ -15,22 +15,33 @@ class BS_Net(nn.Module):
         self.activation = nn.ReLU()
 
     def forward(self, x, n=0, tree=None):
-        layer1 = self.activation(F.max_pool2d(self.bn1(self.conv1(x)), 2))
         if n==1:
-            layer1 = self.quantize_activation(layer1, True, tree[n-1], 'lookup_table')
+            tree0, tree1 = tree[0], tree[1]
+            x = self.quantize_activation(x, True, tree0[n-1], 'lookup_table', True)
+        
+            layer1 = self.activation(F.max_pool2d(self.bn1(self.conv1(x)), 2))
+            layer1 = self.quantize_activation(layer1, True, tree1[n-1], 'lookup_table', False)
 
-        layer2 = self.activation(F.max_pool2d(self.bn2(self.conv2(layer1)), 2))
-        if n==2:
-            tree1, tree2 = tree[0], tree[1]
-            layer1 = self.quantize_activation(layer1, True, tree1[n-2], 'lookup_table')
-            layer2 = self.quantize_activation(layer2, True, tree2[n-2], 'lookup_table')
+            layer2 = self.activation(F.max_pool2d(self.bn2(self.conv2(layer1)), 2))
 
-        x = layer2.view(-1, 16*40) # flatten input to feed it to fully connected layer
-        x = self.activation(self.bn3(self.fc1(x)))
-        x = F.dropout(x, p=0.25)
-        x = self.fc2(x)
-        return x, [layer1, layer2]
+        
+        elif n==2:
+            tree0, tree1, tree2 = tree[0], tree[1], tree[2]
 
-    def quantize_activation(self, input, ifTraining, tree, lookup_table):
+            x = self.quantize_activation(x, True, tree0[n-2], 'lookup_table', True)
+
+            layer1 = self.quantize_activation(layer1, True, tree1[n-2], 'lookup_table', False)
+            layer1 = self.activation(F.max_pool2d(self.bn1(self.conv1(x)), 2))
+            
+            layer2 = self.activation(F.max_pool2d(self.bn2(self.conv2(layer1)), 2))
+            layer2 = self.quantize_activation(layer2, True, tree2[n-2], 'lookup_table', False)
+
+        out = layer2.view(-1, 16*40) # flatten input to feed it to fully connected layer
+        out = self.activation(self.bn3(self.fc1(out)))
+        out = F.dropout(out, p=0.25)
+        out = self.fc2(out)
+        return out, [x, layer1, layer2]
+
+    def quantize_activation(self, input, ifTraining, tree, lookup_table, isInput):
         # return Quantizer(ifQuantizing, ifTraining, tree, lookup_table).apply(input)
-        return Quantizer().apply(input, ifTraining, tree, lookup_table)
+        return Quantizer().apply(input, ifTraining, tree, lookup_table, isInput)

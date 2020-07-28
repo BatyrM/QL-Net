@@ -18,11 +18,11 @@ import numpy as np
 
 class Quantizer(Function):
     @staticmethod
-    def forward(self,  input, ifTraining, tree, lookup_table):
+    def forward(self,  input, ifTraining, tree, lookup_table, isInput):
         input_size = input.size()
         if ifTraining:
             # print "Quantizing during training "
-            output = quantize(input, tree)
+            output = quantize(input, tree, isInput)
         else:
             # If testing then just precomputed value = conv(center, weights)
             output = self.lookup(input, weights, tree, lookup_table)
@@ -36,7 +36,7 @@ class Quantizer(Function):
         grad_input = grad_output.new_zeros(grad_output.shape)
         return grad_input, None, None, None # as there were 4 inputs, need to provide gradients for all
 
-def quantize_patch(x,y,input, k, kernel):
+def quantize_patch(x, y, input, k, kernel):
         stride = 1
         new_stride = 3
         x_step = x*stride
@@ -48,7 +48,7 @@ def quantize_patch(x,y,input, k, kernel):
 
 def lookup(input, weights, tree, lookup_table):
         pad = 1
-        kernel= 5
+        kernel = 5
         stride = 1
 
         batch_size = input.size(0)
@@ -66,11 +66,12 @@ def lookup(input, weights, tree, lookup_table):
                     output[k, :, x_step, y_step] = lookup_table[center_id] # copy approximation to upsampled image
         return output
 
-def quantize(input, tree):
+def quantize(input, tree, isInput):
         p = 0 # padding, as we want to approximate exact input, we dont add any padding
-        kernel= 1
+        kernel = 1
         stride = 1
-
+        if isInput:
+            kernel = 4
         batch_size = input.size(0)
         depth = input.size(1)
         m = input.size(3) # width and height of the filter
