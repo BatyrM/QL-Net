@@ -151,6 +151,6 @@ elif case_number == 7:
     print(lookup_table2.size())
     args.out_name = 'mnist_ql_input_layer&layer'+str(layer_id1)+'&layer'+str(layer_id2)+'.pth'
     print("\n\nWith both layers + input layer quantized:\n")
-    train(model, train_loader, test_loader, args, device, layer_id=layer_id2, tree=[[lookup_table0], [lookup_table1], [lookup_table2]])
+    train(model, train_loader, test_loader, args, device, layer_id=7, tree=[[lookup_table0], [lookup_table1], [lookup_table2]])
 
 # test(model, test_loader, device)
