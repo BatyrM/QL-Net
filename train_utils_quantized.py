@@ -44,7 +44,7 @@ def train(net, trainloader, testloader, args, device, layer_id=0, tree=None):
             optimizer.step()
         
             prec1 = accuracy(outputs.data, labels, topk=(1,))[0]
-            if i % 30 == 0: # print every 2 mini-batches
+            if i % args.print_freq == 0: # print every 2 mini-batches
                 print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tAccuracy: {:.2f}'.format(
                                 epoch, i * len(inputs), len(trainloader.dataset),
                                 100. * i / len(trainloader), loss.item(), prec1.item()))

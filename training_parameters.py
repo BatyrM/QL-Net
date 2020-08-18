@@ -3,6 +3,8 @@ import argparse
 def get_params():
     # Training settings
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
+    parser.add_argument('--print_freq', '-p', default=30, type=int, metavar='N', 
+                        help='print frequency (default: 30)')
     parser.add_argument('--batch_size', type=int, default=100, metavar='N',
                         help='input batch size for training (default: 100)')
     parser.add_argument('--test_batch_size', type=int, default=1000, metavar='N',

@@ -10,6 +10,8 @@ model_names = sorted(name for name in vgg.__dict__
 def get_params():
     # Training settings
     parser = argparse.ArgumentParser(description='PyTorch CIFAR-10 Dataset')
+    parser.add_argument('--print_freq', '-p', default=20, type=int, metavar='N', 
+                        help='print frequency (default: 20)')
     parser.add_argument('--arch', '-a', metavar='ARCH', default='vgg11_bn',
                     choices=model_names,
                     help='model architecture: ' + ' | '.join(model_names) +
