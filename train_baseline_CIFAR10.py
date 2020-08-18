@@ -25,6 +25,7 @@ train_loader = get_data(args, dataset='cifar10', ifTrain=True)
 test_loader = get_data(args, dataset='cifar10', ifTrain=False)
 
 model = vgg.__dict__[args.arch]()
+model.features = nn.DataParallel(model.features)
 model.to(device)
 
 args.out_name = 'cifar10_baseline.pth'

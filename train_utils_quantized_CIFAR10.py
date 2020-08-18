@@ -19,15 +19,15 @@ def accuracy(output, target, topk=(1,)):
     return res
 
 def adjust_learning_rate(lr, optimizer, epoch):
-    """Sets the learning rate to the initial LR decayed by 10 after 3 and 6 epochs"""
-    lr = lr * (0.1 ** (epoch // 6))
+    """Sets the learning rate to the initial LR decayed by 2 after each 30 epochs"""
+    lr = lr * (0.5 ** (epoch // 30))
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
 def train(net, trainloader, testloader, args, device, layer_id=0, tree=None):
     num_epoch, lr = args.epochs+1, args.lr
     criterion = nn.CrossEntropyLoss() #
-    optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=5e-4)
+    optimizer = optim.SGD(net.parameters(), lr=lr, momentum=args.momentum, weight_decay=args.weight_decay)
     best = 0.0
     for epoch in range(num_epoch): # loop over the dataset multiple times
         net.train()

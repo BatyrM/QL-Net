@@ -30,12 +30,31 @@ def get_mnist(args, ifTrain):
     return loader
 
 def get_cifar10(args, ifTrain):
-    kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
-    loader = torch.utils.data.DataLoader(
-        datasets.CIFAR10('./data', train=ifTrain, download=True,
-                       transform=transforms.Compose([
-                           transforms.ToTensor(),
-                           transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-                       ])),
-        batch_size=args.batch_size, shuffle=ifTrain, **kwargs)
+    
+    loader = None
+    
+    kwargs = {'num_workers': args.workers, 'pin_memory': True} if args.cuda else {}
+
+    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                     std=[0.229, 0.224, 0.225])
+
+    if ifTrain:
+        loader = torch.utils.data.DataLoader(
+            datasets.CIFAR10(root='./data', train=ifTrain, transform=transforms.Compose([
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomCrop(32, 4),
+                transforms.ToTensor(),
+                normalize,
+            ]), download=True),
+            batch_size=args.batch_size, shuffle=ifTrain, **kwargs)
+
+    else:
+        loader = torch.utils.data.DataLoader(
+            datasets.CIFAR10(root = './data', train=ifTrain,
+                        transform=transforms.Compose([
+                            transforms.ToTensor(),
+                            normalize,
+                        ])),
+            batch_size=args.batch_size, shuffle=ifTrain, **kwargs)
+    
     return loader
