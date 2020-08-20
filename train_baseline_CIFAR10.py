@@ -10,7 +10,7 @@ from load_data import get_data
 # from baseline_model import BS_Net
 # from train_utils import train, test
 import vgg
-from train_utils_quantized import train, test
+from train_utils_quantized_CIFAR10 import train, test
 from  training_parameters_CIFAR10 import get_params
 
 args = get_params()
