@@ -56,7 +56,11 @@ class VGG(nn.Module):
     def forward(self, x, n = 0, tree = None):
         
         
-        layer1 = self.activation(F.max_pool2d(self.bn1(self.conv1(x))))
+        layer1 = F.max_pool2d(self.activation(self.bn1(self.conv1(x))))
+        layer2 = F.max_pool2d(self.activation(self.bn2(self.conv2(x))))
+        layer3 = self.activation(self.bn3(self.conv3(x)))
+        layer4 = self.activation(self.bn4(self.conv4(x)))
+        
         
         out = self.features(x)
         print(out.shape)
