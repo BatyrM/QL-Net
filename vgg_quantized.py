@@ -19,7 +19,7 @@ class VGG(nn.Module):
     '''
     def __init__(self, features):
         super(VGG, self).__init__()
-        self.conv1 = nn.Conv2d(3, 64, kernel_size = 3, padding = 1)             'A': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M']
+        self.conv1 = nn.Conv2d(3, 64, kernel_size = 3, padding = 1)             #'A': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M']
         self.bn1 = nn.BatchNorm2d(64)
         self.conv2 = nn.Conv2d(64, 128, kernel_size = 3, padding = 1)
         self.bn2 = nn.BatchNorm2d(128)
@@ -55,19 +55,27 @@ class VGG(nn.Module):
 
     def forward(self, x, n = 0, tree = None):
         
-        
+                                                                                #'A': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M']
         layer1 = F.max_pool2d(self.activation(self.bn1(self.conv1(x))))
-        layer2 = F.max_pool2d(self.activation(self.bn2(self.conv2(x))))
-        layer3 = self.activation(self.bn3(self.conv3(x)))
-        layer4 = self.activation(self.bn4(self.conv4(x)))
-        
-        
-        out = self.features(x)
+        if n == 1:
+            layer1 = self.quantize_activation(layer1, True, tree[n-1], 'lookup_table', False)
+        layer2 = F.max_pool2d(self.activation(self.bn2(self.conv2(layer1))))
+        layer3 = self.activation(self.bn3(self.conv3(layer2)))
+        layer4 = F.max_pool2d(self.activation(self.bn4(self.conv4(layer3)))
+        layer5 = self.activation(self.bn5(self.conv5(layer4)))
+        layer6 = F.max_pool2d(self.activation(self.bn6(self.conv6(layer5))))
+        layer7 = self.activation(self.bn7(self.conv7(layer6)))
+        layer8 = F.max_pool2d(self.activation(self.bn8(self.conv8(layer7))))
+        '''out = self.features(x)
         print(out.shape)
-        exit(0)
-        out = out.view(out.size(0), -1)
+        exit(0)'''
+        out = layer8.view(layer8.size(0), -1)
         out = self.classifier(out)
-        return out, x 
+        return out, [x, layer1]
+
+    def quantize_activation(self, input, ifTraining, tree, lookup_table, isInput):
+        # return Quantizer(ifQuantizing, ifTraining, tree, lookup_table).apply(input)
+        return Quantizer().apply(input, ifTraining, tree, lookup_table, isInput)
 
 
 def make_layers(cfg, batch_norm=False):

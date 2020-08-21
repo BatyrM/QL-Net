@@ -11,9 +11,9 @@ import hierarhical_tree_gpu as ht
 
 from load_data import get_data
 # from train_utils import train, test
-from qlnet_model_quantized import BS_Net
-from train_utils_quantized import train, test
-from  training_parameters import get_params
+from vgg_quantized import vgg
+from train_utils_quantized_CIFAR10 import train, test
+from  training_parameters_CIFAR10 import get_params
 
 def if_exist(path):
     if not os.path.exists(path) :
@@ -22,8 +22,8 @@ def if_exist(path):
 ## 1. Load model
 args = get_params()
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-model = BS_Net()
-model.load_state_dict(torch.load('mnist_baseline.pth'))
+model = vgg()
+model.load_state_dict(torch.load('cifar10_baseline.pth'))
 model.to(device).eval()
 
 case_number = args.case_number
