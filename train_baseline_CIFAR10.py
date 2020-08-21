@@ -9,7 +9,7 @@ from torchvision import datasets, transforms
 from load_data import get_data
 # from baseline_model import BS_Net
 # from train_utils import train, test
-import vgg
+from vgg_quantized import VGG
 from train_utils_quantized_CIFAR10 import train, test
 from  training_parameters_CIFAR10 import get_params
 
@@ -24,8 +24,7 @@ if args.cuda:
 train_loader = get_data(args, dataset='cifar10', ifTrain=True)
 test_loader = get_data(args, dataset='cifar10', ifTrain=False)
 
-model = vgg.__dict__[args.arch]()
-model.features = nn.DataParallel(model.features)
+model = VGG()
 model.to(device)
 
 args.out_name = 'cifar10_baseline.pth'

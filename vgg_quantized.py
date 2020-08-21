@@ -17,7 +17,7 @@ class VGG(nn.Module):
     '''
     VGG model 
     '''
-    def __init__(self, features):
+    def __init__(self):
         super(VGG, self).__init__()
         self.conv1 = nn.Conv2d(3, 64, kernel_size = 3, padding = 1)             #'A': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M']
         self.bn1 = nn.BatchNorm2d(64)
@@ -56,16 +56,16 @@ class VGG(nn.Module):
     def forward(self, x, n = 0, tree = None):
         
                                                                                 #'A': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M']
-        layer1 = F.max_pool2d(self.activation(self.bn1(self.conv1(x))))
+        layer1 = F.max_pool2d(self.activation(self.bn1(self.conv1(x))), 2)
         if n == 1:
             layer1 = self.quantize_activation(layer1, True, tree[n-1], 'lookup_table', False)
-        layer2 = F.max_pool2d(self.activation(self.bn2(self.conv2(layer1))))
+        layer2 = F.max_pool2d(self.activation(self.bn2(self.conv2(layer1))), 2)
         layer3 = self.activation(self.bn3(self.conv3(layer2)))
-        layer4 = F.max_pool2d(self.activation(self.bn4(self.conv4(layer3)))
+        layer4 = F.max_pool2d(self.activation(self.bn4(self.conv4(layer3))), 2)
         layer5 = self.activation(self.bn5(self.conv5(layer4)))
-        layer6 = F.max_pool2d(self.activation(self.bn6(self.conv6(layer5))))
+        layer6 = F.max_pool2d(self.activation(self.bn6(self.conv6(layer5))), 2)
         layer7 = self.activation(self.bn7(self.conv7(layer6)))
-        layer8 = F.max_pool2d(self.activation(self.bn8(self.conv8(layer7))))
+        layer8 = F.max_pool2d(self.activation(self.bn8(self.conv8(layer7))), 2)
         '''out = self.features(x)
         print(out.shape)
         exit(0)'''

@@ -11,7 +11,7 @@ import hierarhical_tree_gpu as ht
 
 from load_data import get_data
 # from train_utils import train, test
-from vgg_quantized import vgg
+from vgg_quantized import VGG
 from train_utils_quantized_CIFAR10 import train, test
 from  training_parameters_CIFAR10 import get_params
 
@@ -22,7 +22,7 @@ def if_exist(path):
 ## 1. Load model
 args = get_params()
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-model = vgg()
+model = VGG()
 model.load_state_dict(torch.load('cifar10_baseline.pth'))
 model.to(device).eval()
 
@@ -35,7 +35,7 @@ if case_number >= 4:
         activation_folder0 = os.path.join('./activations', layer0)
         if_exist(activation_folder0)
         ### 2. Load train data
-        train_loader = get_data(args, dataset='mnist', ifTrain=True)
+        train_loader = get_data(args, dataset='cifar10', ifTrain=True)
         ## 2. Extract activations for futher look-up dictionary construction
         for batch_idx, (data, target) in enumerate(train_loader):
             data, target = data.to(device), target.to(device)
@@ -69,7 +69,7 @@ if case_number >= 4:
         if_exist(activation_folder1)
 
         ### 2. Load train data
-        train_loader = get_data(args, dataset='mnist', ifTrain=True)
+        train_loader = get_data(args, dataset='cifar10', ifTrain=True)
         ## 2. Extract activations for futher look-up dictionary construction
         for batch_idx, (data, target) in enumerate(train_loader):
             data, target = data.to(device), target.to(device)
@@ -110,7 +110,7 @@ if case_number >= 4:
         if_exist(activation_folder2)
         
         ### 2. Load train data
-        train_loader = get_data(args, dataset='mnist', ifTrain=True)
+        train_loader = get_data(args, dataset='cifar10', ifTrain=True)
         ## 2. Extract activations for futher look-up dictionary construction
         for batch_idx, (data, target) in enumerate(train_loader):
             data, target = data.to(device), target.to(device)
@@ -155,7 +155,7 @@ if case_number >= 4:
         if_exist(activation_folder2)
 
         ### 2. Load train data
-        train_loader = get_data(args, dataset='mnist', ifTrain=True)
+        train_loader = get_data(args, dataset='cifar10', ifTrain=True)
         ## 2. Extract activations for futher look-up dictionary construction
         for batch_idx, (data, target) in enumerate(train_loader):
             data, target = data.to(device), target.to(device)
@@ -198,7 +198,7 @@ else:
         activation_folder1 = os.path.join('./activations', layer1)
         if_exist(activation_folder1)
         ### 2. Load train data
-        train_loader = get_data(args, dataset='mnist', ifTrain=True)
+        train_loader = get_data(args, dataset='cifar10', ifTrain=True)
         ## 2. Extract activations for futher look-up dictionary construction
         for batch_idx, (data, target) in enumerate(train_loader):
             data, target = data.to(device), target.to(device)
@@ -227,13 +227,13 @@ else:
         activation_folder2 = os.path.join('./activations', layer2)
         if_exist(activation_folder2)
         ### 2. Load train data
-        train_loader = get_data(args, dataset='mnist', ifTrain=True)
+        train_loader = get_data(args, dataset='cifar10', ifTrain=True)
         ## 2. Extract activations for futher look-up dictionary construction
         for batch_idx, (data, target) in enumerate(train_loader):
             data, target = data.to(device), target.to(device)
             _, activations = model(data)
             activation2 = activations[2].cpu().data.numpy()
-            torch.save(activation2, os.path.join(activation_folder2, layer2 + '_'+str(batch_idx)+'.npy'))
+            torch.save(activation2, os.path.join(activation_folder2, layer2+'_'+str(batch_idx)+'.npy'))
             if batch_idx>6:break
 
         # 3 Construct Look-up Dictionary
@@ -262,7 +262,7 @@ else:
         if_exist(activation_folder2)
 
         ### 2. Load train data
-        train_loader = get_data(args, dataset='mnist', ifTrain=True)
+        train_loader = get_data(args, dataset='cifar10', ifTrain=True)
         ## 2. Extract activations for futher look-up dictionary construction
         for batch_idx, (data, target) in enumerate(train_loader):
             data, target = data.to(device), target.to(device)
