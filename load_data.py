@@ -33,7 +33,7 @@ def get_cifar10(args, ifTrain):
     
     loader = None
     
-    kwargs = {'num_workers': args.workers, 'pin_memory': True} if args.cuda else {}
+    kwargs = {'num_workers': 4, 'pin_memory': True} if torch.cuda.is_available() else {}
 
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
