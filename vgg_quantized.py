@@ -57,21 +57,22 @@ class VGG(nn.Module):
     def forward(self, x, n = 0, tree = None):
         
                                                                                 #'A': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M']
-	if n >= 4:
-		if n==4:
-			x = self.quantize_activation(x, True, tree[n-4], 'lookup_table', True)
-		else:
-			tree0 = tree[0]
-			x = self.quantize_activation(x, True, tree0[0], 'lookup_table', True)
+        layer1 = F.max_pool2d(self.activation(self.bn1(self.conv1(x))), 2)
+        if n >= 4:
+            if n==4:
+                x = self.quantize_activation(x, True, tree[n-4], 'lookup_table', True)
+            else:
+                tree0 = tree[0]
+                x = self.quantize_activation(x, True, tree0[0], 'lookup_table', True)
 
-	layer1 = F.max_pool2d(self.activation(self.bn1(self.conv1(x))), 2)
-	if n == 1:
-		layer1 = self.quantize_activation(layer1, True, tree[n-1], 'lookup_table', False)
-	elif n == 5:
-		tree1 = tree[1]
-		layer1 = self.quantize_activation(layer1, True, tree1[n-5], 'lookup_table', False)
+        layer1 = F.max_pool2d(self.activation(self.bn1(self.conv1(x))), 2)
+        if n == 1:
+            layer1 = self.quantize_activation(layer1, True, tree[n-1], 'lookup_table', False)
+        elif n == 5:
+            tree1 = tree[1]
+            layer1 = self.quantize_activation(layer1, True, tree1[n-5], 'lookup_table', False)
         
-	layer2 = F.max_pool2d(self.activation(self.bn2(self.conv2(layer1))), 2)
+        layer2 = F.max_pool2d(self.activation(self.bn2(self.conv2(layer1))), 2)
         layer3 = self.activation(self.bn3(self.conv3(layer2)))
         layer4 = F.max_pool2d(self.activation(self.bn4(self.conv4(layer3))), 2)
         layer5 = self.activation(self.bn5(self.conv5(layer4)))
