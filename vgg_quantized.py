@@ -57,7 +57,6 @@ class VGG(nn.Module):
     def forward(self, x, n = 0, tree = None):
         
                                                                                 #'A': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M']
-        layer1 = F.max_pool2d(self.activation(self.bn1(self.conv1(x))), 2)
         if n >= 4:
             if n==4:
                 x = self.quantize_activation(x, True, tree[n-4], 'lookup_table', True)
